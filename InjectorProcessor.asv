@@ -82,23 +82,16 @@ classdef InjectorProcessor < handle
         end
         
         function start(process)
-            t = timer();
-            t.StartDelay = 0;%延时0秒开始
-            t.ExecutionMode = 'fixedRate';%启用循环执行
-            t.Period = 1;%循环间隔1秒
-            t.TasksToExecute = inf;%循环次数无限
-            t.TimerFcn = {@process.run};
+            t = timer('StartDelay', 0, 'TimerFcn', @process.run,'Period’,2,'ExecutionMode','fixedRate','TasksToExecute',inf);
             start(t);
         end
         
         function run(process,~,~)
             temp = 0.0;
-            if (temp < str2double(process.InjectorDB.Bolus))
+            while (temp < str2double(process.InjectorDB.Bolus))
                 temp = process.InjectorDB.TotalAmount +str2double(process.InjectorDB.Baseline)/60;
                 process.updateTotalAmount(temp); 
                 %pause(1);
-            else
-                stop(t);
             end
     
         end
@@ -106,35 +99,25 @@ classdef InjectorProcessor < handle
        
         
         function emergencyShot(process)
-            val = process.InjectorDB.Authority;
-            if (strcmp(val,'off'))
-                process.App.DisplayTextArea.Value = 'No Authority!';
-                return;
-            end
             %first we check if the input is valid (total baseline&bolus)
             
             EmBolus = str2double(process.InjectorDB.BolusforEm);
             EmBaseline = str2double(process.InjectorDB.BaselineforEm);
-            
             NewBaseline = EmBaseline + str2double(process.InjectorDB.Baseline);
+            process.InjectorDB.Baseline = num2str(NewBaseline);
             re1 = process.checkTotalAmount(num2str(NewBaseline));
+            if strcmp(re1,'f')
+                process.App.DisplayTextArea.Value = 'BaselineforEm is invalid, please reset!';
+                return;
+            end
             
             NewBolus = EmBolus + str2double(process.InjectorDB.Bolus);
+            process.InjectorDB.Bolus = num2str(NewBolus);
             re2 = process.checkSpeed(num2str(NewBolus));
-            
-            if (strcmp(re1,'f')||strcmp(re2,'f'))
-                if(strcmp(re1,'f'))
-                    process.App.DisplayTextArea.Value = 'BaselineforEm is invalid, please reset!';
-                else
-                    process.App.DisplayTextArea.Value = 'BolusforEm is invalid, please reset!';
-                end
+            if strcmp(re2,'f')
+                process.App.DisplayTextArea.Value = 'BolusforEm is invalid, please reset!';
                 return;
-            else
-                process.InjectorDB.Baseline = num2str(NewBaseline);
-                process.InjectorDB.Bolus = num2str(NewBolus);
             end
-          
-            
             temp =0.0;
             while (temp < str2double(process.InjectorDB.BolusforEm))
                 temp = temp + str2double(process.InjectorDB.BaselineforEm)/60;
