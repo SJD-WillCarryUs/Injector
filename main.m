@@ -9,6 +9,7 @@ pro.App=app;
 pro.InjectorDB=db;
 
 app.InjectorProcessor=pro;
+app.InjectorDB = db;
 
 app2.InjectorProcessor=pro;
 

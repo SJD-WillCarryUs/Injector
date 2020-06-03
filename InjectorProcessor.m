@@ -30,14 +30,14 @@ classdef InjectorProcessor < handle
         
         function data = getdata(process,id)
             switch id
-                case 'AmountLimit'
-                    data = process.InjectorDB.AmountLimit;
-                case 'AmountInShortPeriod'
-                    data = process.InjectorDB.AmountInShortPeriod;
                 case 'Baseline'
                     data = process.InjectorDB.Baseline;
                 case 'Bolus'
                     data = process.InjectorDB.Bolus;
+                case 'BaselineforEm'
+                    data = process.InjectorDB.BaselineforEm;
+                case 'BolusforEm'
+                    data = process.InjectorDB.BolusforEm;
             end
         end
         
@@ -50,8 +50,8 @@ classdef InjectorProcessor < handle
             end
         end
         
-        function re = checkTotalAmount(process,data)
-            %value = str2double(data);
+        function re = checkTotalAmount(~,data)
+            value = str2double(data);
             %sum = value + process.InjectorDB.TotalAmount;
             %amountLimit = str2double(process.InjectorDB.AmountLimit);
             %if (sum <= amountLimit)
@@ -83,37 +83,25 @@ classdef InjectorProcessor < handle
         
         
         function start(process)
-            global stopcheck;
-            global i;
-            %global t;
-            i=1;
-            stopcheck = 'f';
             temp = 0.0;
-            while (temp < process.InjectorDB.Amount && strcmp(stopcheck,'f') )
+            while (temp < str2double(process.InjectorDB.Bolus))
                 temp = process.InjectorDB.TotalAmount +str2double(process.InjectorDB.Baseline)/60;
                 process.updateTotalAmount(temp); 
                 pause(1);
-                i=i+1;
-                %t=t+1;
             end
     
         end
         
-        function stop(process)
-            global stopcheck;
-            global i;
-            %global t;
-            stopcheck = 't';
-            process.InjectorDB.Amount = process.InjectorDB.Amount - (str2double(process.InjectorDB.Baseline)/60)*i;
-            process.App.TextArea_Bolus.Value = num2str(process.InjectorDB.Amount,'%.4f');
-            process.InjectorDB.Bolus = num2str(process.InjectorDB.Amount,'%.8f');
-            %while (strcmp(stopcheck,'t'))
-            %    t=t+1;
-            %end
-        end
+       
         
         function emergencyShot(process)
-            
+            %first we check if the input is valid (total baseline&bolus)
+            EmBolus = str2double(process.InjectorDB.BolusforEm);
+            EmBaseline = str2double(process.InjectorDB.BaselineforEm);
+            NewBaseline = EmBaseline + str2double(process.InjectorDB.Baseline);
+            process.InjectorDB.Baseline = num2str(NewBaseline);
+            NewBolus = EmBolus + str2double(process.InjectorDB.Bolus);
+            process.InjectorDB.Bolus = num2str(NewBolus);
         end
        
     end
