@@ -2,8 +2,7 @@ classdef InjectorProcessor < handle
     
     properties
         App
-        InjectorDB
-        
+        InjectorDB    
     end
     
     methods
@@ -52,16 +51,22 @@ classdef InjectorProcessor < handle
         end
         
         function re = checkTotalAmount(process,data)
-            value = str2double(data);
-            sum = value + process.InjectorDB.TotalAmount;
-            amountLimit = str2double(process.InjectorDB.AmountLimit);
-            if (sum <= amountLimit)
-                if (value >= 0.2 && value <=0.5)
-                    re = 't';
-                else
-                    re = 'f';
-                end
-                process.InjectorDB.Amount = sum;
+            %value = str2double(data);
+            %sum = value + process.InjectorDB.TotalAmount;
+            %amountLimit = str2double(process.InjectorDB.AmountLimit);
+            %if (sum <= amountLimit)
+                %if (value >= 0.2 && value <=0.5)
+                    %re = 't';
+                %else
+                    %re = 'f';
+                %end
+                %process.InjectorDB.Amount = sum;
+            %else
+                %re = 'f';
+            %end
+        %end
+            if (value >= 0.2 && value <=0.5)
+                re = 't';
             else
                 re = 'f';
             end

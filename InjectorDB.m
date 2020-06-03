@@ -7,6 +7,8 @@ classdef InjectorDB < handle
         AmountInShortPeriod = '1';
         Baseline = 'empty';
         Bolus = 'empty';
+        BaselineforEm = 'empty';
+        BolusforEm = 'empty';
         Authority = 'off';
         Amount = 0.0;
         
