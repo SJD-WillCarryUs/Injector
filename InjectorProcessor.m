@@ -42,9 +42,9 @@ classdef InjectorProcessor < handle
             process.InjectorDB.SetAuthority(bol);
         end
         
-        function ToUpdateTotalAmount(process,data)
-            process.InjectorDB.UpdateTotalAmount(data);
-        end
+       % function ToUpdateTotalAmount(process,data)
+         %   process.InjectorDB.UpdateTotalAmount(data);
+       % end
         
         
         
