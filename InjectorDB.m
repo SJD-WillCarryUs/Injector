@@ -11,8 +11,7 @@ classdef InjectorDB < handle
         BolusforEm = 'empty';
         Authority = 'off';
         Amount = 0.0;
-        AmountPerDay = 0;
-        AmountPerHour = 0;
+
         
         TotalAmount = 0.0;
     end
@@ -21,12 +20,15 @@ classdef InjectorDB < handle
         function SetAmountLimit(DB,data)
             DB.AmountLimit=data;
         end
+        
         function SetAmountInShortPeriod(DB,data)
             DB.AmountInShortPeriod=data;
         end
+        
         function SetBaseline(DB,data)
             DB.Baseline=data;
         end
+        
         function SetBolus(DB,data)
             DB.Bolus=data;
         end
