@@ -101,6 +101,8 @@ classdef InjectorProcessor < handle
             process.t.TimerFcn = {@process.run};
             start(process.t);
             
+            process.InjectorDB.BaselineOrigin = process.InjectorDB.Baseline;
+            
             process.timerstateDay = 2;
             process.timerstateHour = 2;
             
@@ -177,10 +179,7 @@ classdef InjectorProcessor < handle
         end
             
             
-        
-            
-     
-                
+
         
         function run(process,~,~)
         
@@ -189,10 +188,22 @@ classdef InjectorProcessor < handle
                 process.updateTotalAmount(process.temp1); 
             else
                 stop(process.t);
+                process.InjectorDB.Baseline = process.InjectorDB.Baseline - process.InjectorDB.BaselineOrigin;
                 process.timerstateHour = 0;
                 process.timerstateDay = 0;
                 process.App.setButton.Enable = 'on';
                 process.App.startButton.Enable = 'on';
+                
+                process.App.TextArea_BaselineforEm.Value = 'waiting!';
+                process.App.TextArea_BolusforEm.Value = 'waiting!';
+                process.App.TextArea_Baseline.Value = 'waiting!';
+                process.App.TextArea_Bolus.Value = 'waiting!';
+                
+                process.InjectorDB.Baseline = 'empty';
+                process.InjectorDB.Bolus = 'empty';
+                process.InjectorDB.BaselineforEm = 'empty';
+                process.InjectorDB.BolusforEm = 'empty';
+                
             end
     
         end
