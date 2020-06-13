@@ -8,8 +8,8 @@ classdef InjectorProcessor < handle
         i = 1
         j = 1
         
-        HourCache
-        DayCache
+        HourCache=linspace(0,0,3600)
+        DayCache=linspace(0,0,86400)
         
         t %timer for function run(process,~,~)
         e %timer for amount of BolusforEm injected
@@ -21,8 +21,8 @@ classdef InjectorProcessor < handle
         timerstateDay = 0 %用于确认主时钟t是否处于达到阈值后的pause状态且用于辨认pause的原因是由于达到24小时限制引起的还是一小时限制引起的 （0表示注射完毕自然停止 1表示因为达到阈值而中止 2表示正常注射状态）
         timerstateHour = 0
         
-        temp1 = 0
-        temp2 = 0
+        temp1 = 0.0
+        temp2 = 0.0
     end
     
     methods
@@ -101,7 +101,7 @@ classdef InjectorProcessor < handle
             process.t.TimerFcn = {@process.run};
             start(process.t);
             
-            process.InjectorDB.BaselineOrigin = process.InjectorDB.Baseline;
+            process.InjectorDB.BaselineOrigin = str2double(process.InjectorDB.Baseline);
             
             process.timerstateDay = 2;
             process.timerstateHour = 2;
@@ -127,16 +127,16 @@ classdef InjectorProcessor < handle
         end
         
         function CaculateHour(process,~,~)
-            process.HourCache(process.i) = process.InjectorDB.Baseline/60;
-            sum = 0;
+            process.HourCache(process.i) = str2double(process.InjectorDB.Baseline)/60;
+            sum = 0.0;
             
             for a=1:3600
                 sum=process.HourCache(a)+sum;
             end
             
             if ((sum>=str2double(process.InjectorDB.AmountInShortPeriod))&&(process.timerstateHour ~= 1))%如果达到一小时阈值则将主时钟t stop
-                stop(process.t);
                 process.timerstateHour = 1;
+                stop(process.t);
             end
             
             if ((sum < str2double(process.InjectorDB.AmountInShortPeriod)) && (process.timerstateHour == 1)) %如果更新后的一小时内的注射量小于阈值且注射过程处于因达到一小时阈值的pause状态，则恢复注射
@@ -153,7 +153,7 @@ classdef InjectorProcessor < handle
         end
         
         function CaculateDay(process,~,~) 
-            process.DayCache(process.j) = process.InjectorDB.Baseline/60;
+            process.DayCache(process.j) = str2double(process.InjectorDB.Baseline)/60;
             sum = 0;
             
             for a=1:86400
@@ -187,8 +187,7 @@ classdef InjectorProcessor < handle
                 process.temp1 = process.InjectorDB.TotalAmount +str2double(process.InjectorDB.Baseline)/60;
                 process.updateTotalAmount(process.temp1); 
             else
-                stop(process.t);
-                process.InjectorDB.Baseline = process.InjectorDB.Baseline - process.InjectorDB.BaselineOrigin;
+                process.InjectorDB.Baseline =num2str(str2double(process.InjectorDB.Baseline) - process.InjectorDB.BaselineOrigin);
                 process.timerstateHour = 0;
                 process.timerstateDay = 0;
                 process.App.setButton.Enable = 'on';
@@ -203,6 +202,7 @@ classdef InjectorProcessor < handle
                 process.InjectorDB.Bolus = 'empty';
                 process.InjectorDB.BaselineforEm = 'empty';
                 process.InjectorDB.BolusforEm = 'empty';
+                stop(process.t);
                 
             end
     
@@ -213,13 +213,13 @@ classdef InjectorProcessor < handle
         
         function CaculateBolusforEm(process,~,~)
              if (process.temp2 < str2double(process.InjectorDB.BolusforEm))
-                process.temp2 = process.temp2 + str2double(process.InjectorDB.BaselineforEm)/60;
+                process.temp2 = process.temp2 + str2double(process.InjectorDB.BaselineforEm)./60;
              else
                 process.InjectorDB.Baseline = num2str(str2double(process.InjectorDB.Baseline)-str2double(process.InjectorDB.BaselineforEm));
                 %emergency shot结束后返回原来的注射速度
-                stop(process.e);
                 process.temp2 = 0;
                 process.App2.emergencyshotButton.Enable = 'on';
+                stop(process.e);
              end
                  
         end
