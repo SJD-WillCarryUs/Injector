@@ -12,6 +12,7 @@ classdef InjectorProcessor < handle
         DayCache=linspace(0,0,86400)
         
         t %timer for function run(process,~,~)
+        m %timer for amount of OriginBolus injected
         e %timer for amount of BolusforEm injected
         
         caculateHour 
@@ -23,6 +24,7 @@ classdef InjectorProcessor < handle
         
         temp1 = 0.0
         temp2 = 0.0
+        temp3 = 0.0
     end
     
     methods
@@ -90,6 +92,16 @@ classdef InjectorProcessor < handle
         end
         
         function start(process)
+            
+            process.e = timer();
+            process.e.StartDelay = 0;%延时0秒开始
+            process.e.ExecutionMode = 'fixedRate';%启用循环执行
+            process.e.Period = 1;%循环间隔1秒
+            process.e.TasksToExecute = inf;%循环次数无限
+            process.e.TimerFcn = {@process.CaculateBolusforEm};
+            
+            
+            
             process.App.setButton.Enable = 'off';
             process.App.startButton.Enable = 'off';
             
@@ -102,6 +114,7 @@ classdef InjectorProcessor < handle
             start(process.t);
             
             process.InjectorDB.BaselineOrigin = str2double(process.InjectorDB.Baseline);
+            process.InjectorDB.BolusOrigin = str2double(process.InjectorDB.Bolus);
             
             process.timerstateDay = 2;
             process.timerstateHour = 2;
@@ -123,7 +136,24 @@ classdef InjectorProcessor < handle
             process.caculateDay.TasksToExecute = inf;%循环次数无限
             process.caculateDay.TimerFcn = {@process.CaculateDay};
             start(process.caculateDay);
+            
+            process.m = timer();
+            process.m.StartDelay = 0;%延时0秒开始
+            process.m.ExecutionMode = 'fixedRate';%启用循环执行
+            process.m.Period = 1;%循环间隔1秒
+            process.m.TasksToExecute = inf;%循环次数无限
+            process.m.TimerFcn = {@process.CaculateBolus};
+            start(process.m);
            
+        end
+        
+         function run(process,~,~)
+
+                process.temp1 = process.InjectorDB.TotalAmount +str2double(process.InjectorDB.Baseline)/60;
+                process.updateTotalAmount(process.temp1); 
+  
+         
+    
         end
         
         function CaculateHour(process,~,~)
@@ -181,45 +211,68 @@ classdef InjectorProcessor < handle
             
 
         
-        function run(process,~,~)
-        
-            if (process.temp1 < str2double(process.InjectorDB.Bolus))
-                process.temp1 = process.InjectorDB.TotalAmount +str2double(process.InjectorDB.Baseline)/60;
-                process.updateTotalAmount(process.temp1); 
-            else
-                process.InjectorDB.Baseline =num2str(str2double(process.InjectorDB.Baseline) - process.InjectorDB.BaselineOrigin);
-                process.timerstateHour = 0;
-                process.timerstateDay = 0;
-                process.App.setButton.Enable = 'on';
-                process.App.startButton.Enable = 'on';
-                
-                process.App.TextArea_BaselineforEm.Value = 'waiting!';
-                process.App.TextArea_BolusforEm.Value = 'waiting!';
-                process.App.TextArea_Baseline.Value = 'waiting!';
-                process.App.TextArea_Bolus.Value = 'waiting!';
-                
-                process.InjectorDB.Baseline = 'empty';
-                process.InjectorDB.Bolus = 'empty';
-                process.InjectorDB.BaselineforEm = 'empty';
-                process.InjectorDB.BolusforEm = 'empty';
-                stop(process.t);
-                
-            end
-    
-        end
+       
         
         
             
         
         function CaculateBolusforEm(process,~,~)
              if (process.temp2 < str2double(process.InjectorDB.BolusforEm))
-                process.temp2 = process.temp2 + str2double(process.InjectorDB.BaselineforEm)./60;
+                process.temp2 = process.temp2 + str2double(process.InjectorDB.BaselineforEm)/60;
              else
                 process.InjectorDB.Baseline = num2str(str2double(process.InjectorDB.Baseline)-str2double(process.InjectorDB.BaselineforEm));
                 %emergency shot结束后返回原来的注射速度
                 process.temp2 = 0;
                 process.App2.emergencyshotButton.Enable = 'on';
+                if ~get(process.m, 'Running')
+                    process.App.setButton.Enable = 'on';
+                    process.App.startButton.Enable = 'on';
+              
+                
+                    process.App.TextArea_BaselineforEm.Value = 'waiting!';
+                    process.App.TextArea_BolusforEm.Value = 'waiting!';
+                    process.App.TextArea_Baseline.Value = 'waiting!';
+                    process.App.TextArea_Bolus.Value = 'waiting!';
+                
+               
+                    process.InjectorDB.Bolus = 'empty';
+                    process.InjectorDB.BaselineforEm = 'empty';
+                    process.InjectorDB.BolusforEm = 'empty';
+                    stop(process.t);
+                end
                 stop(process.e);
+             end
+                 
+        end
+        
+        
+        function CaculateBolus(process,~,~)
+             if (process.temp3 < process.InjectorDB.BolusOrigin)
+                
+                process.temp3 = process.temp3 + process.InjectorDB.BaselineOrigin/60;
+             else
+                process.InjectorDB.Baseline = num2str(str2double(process.InjectorDB.Baseline)-process.InjectorDB.BaselineOrigin);
+                %主要注射结束 但emegency shot可能仍在进行
+                process.temp3 = 0;
+                if ~get(process.e, 'Running')%如果emegency shot已经结束或不存在，则停止主进程
+                    process.App.setButton.Enable = 'on';
+                    process.App.startButton.Enable = 'on';
+              
+                
+                    process.App.TextArea_BaselineforEm.Value = 'waiting!';
+                    process.App.TextArea_BolusforEm.Value = 'waiting!';
+                    process.App.TextArea_Baseline.Value = 'waiting!';
+                    process.App.TextArea_Bolus.Value = 'waiting!';
+                
+               
+                    process.InjectorDB.Bolus = 'empty';
+                    process.InjectorDB.BaselineforEm = 'empty';
+                    process.InjectorDB.BolusforEm = 'empty';
+                    
+                    stop(process.t);
+                end
+                stop(process.m);
+                
              end
                  
         end
@@ -267,12 +320,7 @@ classdef InjectorProcessor < handle
           
             %meanwhile, caculate the amount of BolusforEm injected
             
-            process.e = timer();
-            process.e.StartDelay = 0;%延时0秒开始
-            process.e.ExecutionMode = 'fixedRate';%启用循环执行
-            process.e.Period = 1;%循环间隔1秒
-            process.e.TasksToExecute = inf;%循环次数无限
-            process.e.TimerFcn = {@process.CaculateBolusforEm};
+        
             start(process.e);
             
            

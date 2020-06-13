@@ -12,6 +12,7 @@ classdef InjectorDB < handle
         Authority = 'off';
         Amount = 0.0;
         BaselineOrigin = 0.0;
+        BolusOrigin = 0.0
 
         
         TotalAmount = 0.0;
