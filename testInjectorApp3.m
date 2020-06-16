@@ -24,7 +24,7 @@ classdef testInjectorApp3 < matlab.uitest.TestCase
     end
     methods (Test)
         function test_SelectButtonPushed(testCase)
-            
+            testCase.press(testCase.app.powerSwitch);
             testCase.press(testCase.app.AuthoritySwitch);
             pause(1);
             testCase.type(testCase.app.inputEditField,'0.5');
