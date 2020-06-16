@@ -294,14 +294,14 @@ classdef InjectorProcessor < handle
             process.e = timer();
             process.e.StartDelay = 0;%延时0秒开始
             process.e.ExecutionMode = 'fixedRate';%启用循环执行
-            process.e.Period = 0.1;%循环间隔0.1秒
+            process.e.Period = 0.025;%循环间隔0.025秒
             process.e.TasksToExecute = inf;%循环次数无限
             process.e.TimerFcn = {@process.CaculateBolusforEm};
             
             process.t = timer();
             process.t.StartDelay = 0;%延时0秒开始
             process.t.ExecutionMode = 'fixedRate';%启用循环执行
-            process.t.Period = 0.1;%循环间隔0.1秒
+            process.t.Period = 0.025;%循环间隔0.025秒
             process.t.TasksToExecute = inf;%循环次数无限
             process.t.TimerFcn = {@process.run};
             
@@ -309,7 +309,7 @@ classdef InjectorProcessor < handle
             process.caculateHour = timer();
             process.caculateHour.StartDelay = 0;%延时0秒开始
             process.caculateHour.ExecutionMode = 'fixedRate';%启用循环执行
-            process.caculateHour.Period = 0.1;%循环间隔0.1秒
+            process.caculateHour.Period = 0.025;%循环间隔0.025秒
             process.caculateHour.TasksToExecute = inf;%循环次数无限
             process.caculateHour.TimerFcn = {@process.CaculateHour};
             
@@ -317,7 +317,7 @@ classdef InjectorProcessor < handle
             process.caculateDay = timer();
             process.caculateDay.StartDelay = 0;%延时0秒开始
             process.caculateDay.ExecutionMode = 'fixedRate';%启用循环执行
-            process.caculateDay.Period = 0.1;%循环间隔0.1秒
+            process.caculateDay.Period = 0.025;%循环间隔0.025秒
             process.caculateDay.TasksToExecute = inf;%循环次数无限
             process.caculateDay.TimerFcn = {@process.CaculateDay};
             
@@ -325,7 +325,7 @@ classdef InjectorProcessor < handle
             process.m = timer();
             process.m.StartDelay = 0;%延时0秒开始
             process.m.ExecutionMode = 'fixedRate';%启用循环执行
-            process.m.Period = 0.1;%循环间隔0.1秒
+            process.m.Period = 0.025;%循环间隔0.025秒
             process.m.TasksToExecute = inf;%循环次数无限
             process.m.TimerFcn = {@process.CaculateBolus};
             
