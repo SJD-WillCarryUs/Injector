@@ -224,7 +224,8 @@ classdef InjectorProcessor < handle
                 %emergency shot结束后返回原来的注射速度
                 process.temp2 = 0;
                 process.App2.emergencyshotButton.Enable = 'on';
-                if ~get(process.m, 'Running')
+                if strcmp(get(process.m, 'Running'),'off')
+                    
                     process.App.setButton.Enable = 'on';
                     process.App.startButton.Enable = 'on';
               
@@ -254,7 +255,7 @@ classdef InjectorProcessor < handle
                 process.InjectorDB.Baseline = num2str(str2double(process.InjectorDB.Baseline)-process.InjectorDB.BaselineOrigin);
                 %主要注射结束 但emegency shot可能仍在进行
                 process.temp3 = 0;
-                if ~get(process.e, 'Running')%如果emegency shot已经结束或不存在，则停止主进程
+                if strcmp(get(process.e, 'Running'),'off')%如果emegency shot已经结束或不存在，则停止主进程
                     process.App.setButton.Enable = 'on';
                     process.App.startButton.Enable = 'on';
               
