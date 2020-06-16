@@ -60,7 +60,9 @@ classdef testInjectorApp3 < matlab.uitest.TestCase
             testCase.press(testCase.app.startButton);
             pause(1);
             testCase.press(testCase.app2.emergencyshotButton);
-            pause(1);
+            pause(10);
+            testCase.addTeardown(@delete,testCase.app);
+            testCase.addTeardown(@delete,testCase.app2);
 
         end
         
