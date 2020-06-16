@@ -8,6 +8,13 @@ classdef InjectorProcessor < handle
         i = 1
         j = 1
         
+
+        y = 1
+        z = 1
+         
+        p = 1
+        q = 1
+        
         HourCache=linspace(0,0,3600)
         DayCache=linspace(0,0,86400)
         
@@ -93,56 +100,28 @@ classdef InjectorProcessor < handle
         
         function start(process)
             
-            process.e = timer();
-            process.e.StartDelay = 0;%延时0秒开始
-            process.e.ExecutionMode = 'fixedRate';%启用循环执行
-            process.e.Period = 0.1;%循环间隔0.1秒
-            process.e.TasksToExecute = inf;%循环次数无限
-            process.e.TimerFcn = {@process.CaculateBolusforEm};
-            
-            
-            
+
             process.App.setButton.Enable = 'off';
             process.App.startButton.Enable = 'off';
             
-            process.t = timer();
-            process.t.StartDelay = 0;%延时0秒开始
-            process.t.ExecutionMode = 'fixedRate';%启用循环执行
-            process.t.Period = 0.1;%循环间隔0.1秒
-            process.t.TasksToExecute = inf;%循环次数无限
-            process.t.TimerFcn = {@process.run};
             start(process.t);
-            
+ 
             process.InjectorDB.BaselineOrigin = str2double(process.InjectorDB.Baseline);
             process.InjectorDB.BolusOrigin = str2double(process.InjectorDB.Bolus);
             
             process.timerstateDay = 2;
             process.timerstateHour = 2;
             
+            if (process.y == 1)
+                start(process.caculateHour);
+                process.y = process.y - 1;
+            end
             
-            process.caculateHour = timer();
-            process.caculateHour.StartDelay = 0;%延时0秒开始
-            process.caculateHour.ExecutionMode = 'fixedRate';%启用循环执行
-            process.caculateHour.Period = 0.1;%循环间隔0.1秒
-            process.caculateHour.TasksToExecute = inf;%循环次数无限
-            process.caculateHour.TimerFcn = {@process.CaculateHour};
-            start(process.caculateHour);
-            
-            
-            process.caculateDay = timer();
-            process.caculateDay.StartDelay = 0;%延时0秒开始
-            process.caculateDay.ExecutionMode = 'fixedRate';%启用循环执行
-            process.caculateDay.Period = 0.1;%循环间隔0.1秒
-            process.caculateDay.TasksToExecute = inf;%循环次数无限
-            process.caculateDay.TimerFcn = {@process.CaculateDay};
-            start(process.caculateDay);
-            
-            process.m = timer();
-            process.m.StartDelay = 0;%延时0秒开始
-            process.m.ExecutionMode = 'fixedRate';%启用循环执行
-            process.m.Period = 0.1;%循环间隔0.1秒
-            process.m.TasksToExecute = inf;%循环次数无限
-            process.m.TimerFcn = {@process.CaculateBolus};
+            if (process.z == 1)
+                start(process.caculateDay);
+                process.z = process.z - 1;
+            end
+     
             start(process.m);
            
         end
@@ -157,7 +136,11 @@ classdef InjectorProcessor < handle
         end
         
         function CaculateHour(process,~,~)
-            process.HourCache(process.i) = str2double(process.InjectorDB.Baseline)/60;
+            if strcmp(get(process.t, 'Running'),'on')
+                process.HourCache(process.i) = str2double(process.InjectorDB.Baseline)/60;
+            else
+                process.HourCache(process.i) = 0;
+            end
             sum = 0.0;
             
             for a=1:3600
@@ -166,11 +149,22 @@ classdef InjectorProcessor < handle
             
             if ((sum>=str2double(process.InjectorDB.AmountInShortPeriod))&&(process.timerstateHour ~= 1))%如果达到一小时阈值则将主时钟t stop
                 process.timerstateHour = 1;
+                
                 stop(process.t);
+                stop(process.m);
+                if strcmp(get(process.e, 'Running'),'on')
+                    stop(process.e);
+                    process.p = 0;
+                end
             end
             
             if ((sum < str2double(process.InjectorDB.AmountInShortPeriod)) && (process.timerstateHour == 1)) %如果更新后的一小时内的注射量小于阈值且注射过程处于因达到一小时阈值的pause状态，则恢复注射
                 start(process.t);
+                start(process.m);
+                if (process.p == 0)
+                    start(process.e);
+                    process.p = 1;
+                end
                 process.timerstateHour = 2;
             end
             
@@ -183,7 +177,11 @@ classdef InjectorProcessor < handle
         end
         
         function CaculateDay(process,~,~) 
-            process.DayCache(process.j) = str2double(process.InjectorDB.Baseline)/60;
+            if strcmp(get(process.t, 'Running'),'on')
+                process.DayCache(process.j) = str2double(process.InjectorDB.Baseline)/60;
+            else
+                process.DayCache(process.j) = 0;
+            end
             sum = 0;
             
             for a=1:86400
@@ -192,11 +190,21 @@ classdef InjectorProcessor < handle
             
             if ((sum >= str2double(process.InjectorDB.AmountLimit))&&(process.timerstateDay ~= 1))%如果达到24小时阈值则将主时钟t stop
                 stop(process.t);
+                stop(process.m);
+                if strcmp(get(process.e, 'Running'),'on')
+                    stop(process.e);
+                    process.q = 0;
+                end
                 process.timerstateDay = 1;
             end
             
             if ((sum < str2double(process.InjectorDB.AmountLimit)) && (process.timerstateDay == 1)) %如果更新后的24小时内的注射量小于阈值且注射过程处于因达到24小时阈值的pause状态，则恢复注射
                 start(process.t);
+                start(process.m);
+                if (process.q == 0)
+                    start(process.e);
+                    process.q = 1;
+                end
                 process.timerstateDay = 2;
             end
             
@@ -239,6 +247,7 @@ classdef InjectorProcessor < handle
                     process.InjectorDB.Bolus = 'empty';
                     process.InjectorDB.BaselineforEm = 'empty';
                     process.InjectorDB.BolusforEm = 'empty';
+                    process.InjectorDB.TotalAmount = 0.0;
                     stop(process.t);
                 end
                 stop(process.e);
@@ -269,6 +278,7 @@ classdef InjectorProcessor < handle
                     process.InjectorDB.Bolus = 'empty';
                     process.InjectorDB.BaselineforEm = 'empty';
                     process.InjectorDB.BolusforEm = 'empty';
+                    process.InjectorDB.TotalAmount = 0.0;
                     
                     stop(process.t);
                 end
@@ -280,6 +290,51 @@ classdef InjectorProcessor < handle
         
  
         
+        function poweron(process)
+            process.e = timer();
+            process.e.StartDelay = 0;%延时0秒开始
+            process.e.ExecutionMode = 'fixedRate';%启用循环执行
+            process.e.Period = 0.1;%循环间隔0.1秒
+            process.e.TasksToExecute = inf;%循环次数无限
+            process.e.TimerFcn = {@process.CaculateBolusforEm};
+            
+            process.t = timer();
+            process.t.StartDelay = 0;%延时0秒开始
+            process.t.ExecutionMode = 'fixedRate';%启用循环执行
+            process.t.Period = 0.1;%循环间隔0.1秒
+            process.t.TasksToExecute = inf;%循环次数无限
+            process.t.TimerFcn = {@process.run};
+            
+            
+            process.caculateHour = timer();
+            process.caculateHour.StartDelay = 0;%延时0秒开始
+            process.caculateHour.ExecutionMode = 'fixedRate';%启用循环执行
+            process.caculateHour.Period = 0.1;%循环间隔0.1秒
+            process.caculateHour.TasksToExecute = inf;%循环次数无限
+            process.caculateHour.TimerFcn = {@process.CaculateHour};
+            
+            
+            process.caculateDay = timer();
+            process.caculateDay.StartDelay = 0;%延时0秒开始
+            process.caculateDay.ExecutionMode = 'fixedRate';%启用循环执行
+            process.caculateDay.Period = 0.1;%循环间隔0.1秒
+            process.caculateDay.TasksToExecute = inf;%循环次数无限
+            process.caculateDay.TimerFcn = {@process.CaculateDay};
+            
+            
+            process.m = timer();
+            process.m.StartDelay = 0;%延时0秒开始
+            process.m.ExecutionMode = 'fixedRate';%启用循环执行
+            process.m.Period = 0.1;%循环间隔0.1秒
+            process.m.TasksToExecute = inf;%循环次数无限
+            process.m.TimerFcn = {@process.CaculateBolus};
+            
+            
+            
+            
+        end
+            
+            
         
         
         
