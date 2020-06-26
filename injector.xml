@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?><!DOCTYPE nta PUBLIC '-//Uppaal Team//DTD Flat System 1.1//EN' 'http://www.it.uu.se/research/group/darts/uppaal/flat-1_1.dtd'><nta><declaration>// Place global declarations here.
+
+
+</declaration><template><name x="5" y="5">CaculateHour</name><declaration>// Place local declarations here.
+int timer=0;
+
+const int Baseline = 5; // ml/(min*100)
+
+const int AmountInShortPeriod = 100;   // the limit in 1 hour is 1ml
+
+int Bolus[3] = {50, 20, 50}; 
+
+int amount = 0;
+
+int id;
+
+int HourCache[60];
+
+int finish_judge(int a){
+	if(amount==Bolus[a]){
+		return 1;
+	}
+	return 0;
+}
+
+
+int judge(){
+	int sum = 0;
+	int i;
+	for(i =0;i&lt;60;i++){
+		sum+=HourCache[i];
+	}
+	if(sum==AmountInShortPeriod){
+		return 1;
+	}
+	return 0;
+}
+
+void update_timer(){
+	timer++;
+}
+
+void inject(int a){
+	int i = a%60;
+	HourCache[i]=Baseline;
+	amount += Baseline;
+}
+
+void stop(int a){
+	int i = a%60;
+	HourCache[i]=0;
+}</declaration><location id="id0" x="96" y="1272"><name x="86" y="1242">inject_state</name></location><location id="id1" x="224" y="1152"><name x="232" y="1144">stop_state</name></location><location id="id2" x="-32" y="1152"><name x="-42" y="1122">finish_state</name></location><location id="id3" x="96" y="1384"><name x="64" y="1400">start_state</name></location><init ref="id3"/><transition><source ref="id1"/><target ref="id1"/><label kind="guard" x="324" y="1064">judge()==1</label><label kind="assignment" x="336" y="1088">update_timer(),
+stop(timer)</label><nail x="348" y="1120"/><nail x="304" y="1064"/></transition><transition><source ref="id0"/><target ref="id0"/><label kind="guard" x="208" y="1256">judge()==0&amp;&amp;
+finish_judge(id)==0</label><label kind="assignment" x="200" y="1288">update_timer(),
+inject(timer)</label><nail x="112" y="1272"/><nail x="192" y="1272"/><nail x="184" y="1320"/></transition><transition><source ref="id2"/><target ref="id3"/><label kind="guard" x="16" y="1280">id&lt;2</label><label kind="assignment" x="0" y="1312">id=id+1,
+amount=0</label></transition><transition><source ref="id0"/><target ref="id2"/><label kind="guard" x="16" y="1208">finish_judge(id)==1</label></transition><transition><source ref="id1"/><target ref="id0"/><label kind="guard" x="120" y="1144">judge()==0</label><nail x="220" y="1138"/><nail x="196" y="1122"/></transition><transition><source ref="id0"/><target ref="id1"/><label kind="guard" x="160" y="1208">judge()==1</label></transition><transition><source ref="id3"/><target ref="id0"/></transition></template><template><name>CaculateBolusforEM</name><declaration>
+int timer=0;
+
+int t = 3;
+
+const int Baseline = 5; // ml/(min*100)
+
+int Bolus = 50; 
+
+const int BaselineForEm = 5;
+
+int BolusForEm = 10;
+
+int amount = 0;
+int BaselineForInject = Baseline;
+
+</declaration><location id="id4" x="600" y="40"><name x="590" y="10">finish_state</name></location><location id="id5" x="352" y="-32"><name x="360" y="-64">emergency_only</name></location><location id="id6" x="136" y="40"><name x="16" y="56">main_emergency</name></location><location id="id7" x="360" y="136"><name x="320" y="176">main_inject</name></location><location id="id8" x="360" y="288"><name x="328" y="304">start_state</name></location><init ref="id8"/><transition><source ref="id5"/><target ref="id5"/><label kind="guard" x="336" y="-216">BolusForEm&gt;0</label><label kind="assignment" x="336" y="-264">timer=timer+1,
+amount=amount+BaselineForInject,
+BolusForEm=BolusForEm-BaselineForEm</label><nail x="440" y="-184"/><nail x="320" y="-184"/></transition><transition><source ref="id6"/><target ref="id6"/><label kind="guard" x="-48" y="-168">BolusForEm&gt;0&amp;&amp;Bolus&gt;0</label><label kind="assignment" x="-48" y="-152">timer=timer+1,
+amount=amount+BaselineForInject,
+Bolus=Bolus-Baseline,
+BolusForEm=BolusForEm-BaselineForEm</label><nail x="56" y="-96"/><nail x="0" y="-32"/></transition><transition><source ref="id7"/><target ref="id7"/><label kind="guard" x="512" y="128">timer!=t&amp;&amp;Bolus&gt;0</label><label kind="assignment" x="512" y="144">timer=timer+1,
+amount=amount+BaselineForInject,
+Bolus=Bolus-BaselineForInject</label><nail x="516" y="136"/><nail x="484" y="200"/></transition><transition><source ref="id6"/><target ref="id7"/><label kind="guard" x="8" y="136">Bolus&gt;0&amp;&amp;BolusForEm==0</label><label kind="assignment" x="16" y="160">BaselineForInject=BaselineForEm</label><nail x="112" y="136"/></transition><transition><source ref="id7"/><target ref="id4"/><label kind="guard" x="496" y="72">Bolus==0</label></transition><transition><source ref="id6"/><target ref="id4"/><label kind="guard" x="288" y="16">Bolus==0&amp;&amp;BolusForEm==0</label></transition><transition><source ref="id5"/><target ref="id4"/><label kind="guard" x="416" y="-26">BolusForEm==0</label></transition><transition><source ref="id6"/><target ref="id5"/><label kind="guard" x="168" y="-48">Bolus==0&amp;&amp;BolusForEm&gt;0</label><label kind="assignment" x="168" y="-32">BaselineForInject=BaselineForEm</label></transition><transition><source ref="id7"/><target ref="id6"/><label kind="guard" x="248" y="64">timer==t</label><label kind="assignment" x="152" y="80">BaselineForInject=BaselineForInject+BaselineForEm</label></transition><transition><source ref="id8"/><target ref="id7"/></transition></template><system>// Place template instantiations here.
+Process1 = CaculateHour();
+Process2 = CaculateBolusforEM();
+
+// List one or more processes to be composed into a system.
+system Process1,Process2;</system></nta>

@@ -22,7 +22,7 @@ classdef InjectorProcessor < handle
         m %timer for amount of OriginBolus injected
         e %timer for amount of BolusforEm injected
         
-        caculateHour 
+        caculateHour  
         caculateDay 
        
         
