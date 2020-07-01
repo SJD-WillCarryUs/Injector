@@ -1,6 +1,6 @@
 classdef unitTestInjectorDB < matlab.unittest.TestCase
     methods (Test)
-        function testSetAmountLimit(testCase) % T1.1
+        function testSetAmountLimit(testCase) % T1.1.1
             % State: No AmountLimit set yet
             % Input: New AmountLimit
             % Expected Output: New AmountLimit set in injectorDB
@@ -9,7 +9,7 @@ classdef unitTestInjectorDB < matlab.unittest.TestCase
             db.SetAmountLimit(data);
             testCase.verifyEqual(db.AmountLimit,1);
         end
-        function testSetAmountInShortPeriod(testCase) % T1.2
+        function testSetAmountInShortPeriod(testCase) % T1.1.2
             % State: No AmountInShortPerio set yet
             % Input: New AmountInShortPerio
             % Expected Output: New AmountInShortPerio set in injectorDB
@@ -18,7 +18,7 @@ classdef unitTestInjectorDB < matlab.unittest.TestCase
             db.SetAmountInShortPeriod(data);
             testCase.verifyEqual(db.AmountInShortPeriod,1);
         end
-        function testSetBaseline(testCase) % T1.3
+        function testSetBaseline(testCase) % T1.1.3
             % State: No Baseline set yet
             % Input: New Baseline
             % Expected Output: New Baseline set in injectorDB
@@ -27,7 +27,7 @@ classdef unitTestInjectorDB < matlab.unittest.TestCase
             db.SetBaseline(data);
             testCase.verifyEqual(db.Baseline,0.1);
         end
-        function testSetBolus(testCase) % T1.4
+        function testSetBolus(testCase) % T1.1.4
             % State: No Bolus set yet
             % Input: New Bolus
             % Expected Output: New Bolus set in injectorDB
@@ -36,7 +36,7 @@ classdef unitTestInjectorDB < matlab.unittest.TestCase
             db.SetBolus(data);
             testCase.verifyEqual(db.Bolus,0.1);
         end
-        function testSetAuthority(testCase) % T1.5
+        function testSetAuthority(testCase) % T1.1.5
             % State: No Authority set yet
             % Input: New Authority
             % Expected Output: New Authority set in injectorDB
@@ -45,7 +45,7 @@ classdef unitTestInjectorDB < matlab.unittest.TestCase
             db.SetAuthority(data);
             testCase.verifyEqual(db.Authority,1);
         end
-        function testUpdateTotalAmount(testCase) % T1.6
+        function testUpdateTotalAmount(testCase) % T1.1.6
             % State: the total amount hasn't change
             % Input: New TotalAmount
             % Expected Output: New TotalAmount set in injectorDB

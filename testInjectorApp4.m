@@ -1,4 +1,4 @@
-classdef testInjectorApp4 < matlab.uitest.TestCase
+classdef testInjectorApp4 < matlab.uitest.TestCase  % T3.4
     properties
         app
         app2
@@ -24,7 +24,7 @@ classdef testInjectorApp4 < matlab.uitest.TestCase
         end
     end
     methods (Test)
-        function test_SelectButtonPushed(testCase)
+        function test_SelectButtonPushed(testCase) 
             testCase.press(testCase.app.powerSwitch);
             testCase.type(testCase.app.inputEditField,'0.1');
             testCase.press(testCase.app.setButton);

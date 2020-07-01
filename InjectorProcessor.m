@@ -15,8 +15,8 @@ classdef InjectorProcessor < handle
         p = 1
         q = 1
         
-        interupt = 0
         
+        interupt = 0
         HourCache=linspace(0,0,3600)
         DayCache=linspace(0,0,86400)
         
@@ -164,7 +164,6 @@ classdef InjectorProcessor < handle
             if ((sum < str2double(process.InjectorDB.AmountInShortPeriod)) && (process.timerstateHour == 1)) %如果更新后的一小时内的注射量小于阈值且注射过程处于因达到一小时阈值的pause状态，则恢复注射
                 start(process.t);
                 start(process.m);
-                process.interupt = 0;
                 if (process.p == 0)
                     start(process.e);
                     process.p = 1;
@@ -194,6 +193,7 @@ classdef InjectorProcessor < handle
             if ((sum >= str2double(process.InjectorDB.AmountLimit))&&(process.timerstateDay ~= 1))%如果达到24小时阈值则将主时钟t stop
                 stop(process.t);
                 stop(process.m);
+                process.interupt=1;
                 if strcmp(get(process.e, 'Running'),'on')
                     stop(process.e);
                     process.q = 0;

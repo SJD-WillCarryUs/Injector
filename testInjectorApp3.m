@@ -27,7 +27,7 @@ classdef testInjectorApp3 < matlab.uitest.TestCase
             testCase.press(testCase.app.powerSwitch);
             testCase.press(testCase.app.AuthoritySwitch);
             pause(1);
-            testCase.type(testCase.app.inputEditField,'0.5');
+            testCase.type(testCase.app.inputEditField,'0.5'); %T 3.3.1
             pause(1);
             testCase.press(testCase.app.setButton);
             pause(1);
@@ -41,7 +41,7 @@ classdef testInjectorApp3 < matlab.uitest.TestCase
             pause(1);
             testCase.press(testCase.app.setButton);
             pause(1);
-            testCase.type(testCase.app.inputEditField,'0.2');
+            testCase.type(testCase.app.inputEditField,'0.2');% T3.3.2
             pause(1);
             testCase.press(testCase.app.setButton);
             pause(1);

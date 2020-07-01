@@ -1,4 +1,4 @@
-classdef testInjectorApp2 < matlab.uitest.TestCase
+classdef testInjectorApp2 < matlab.uitest.TestCase  % T3.2
     properties
         app
         app2
